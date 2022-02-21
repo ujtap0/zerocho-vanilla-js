@@ -1,0 +1,163 @@
+<!-- 이차원 배열 다루기_틱택토 -->
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title></title>
+  <style>
+    table {
+      border-collapse: collapse;
+    }
+  
+    td {
+      border: 1px solid black;
+      width: 40px;
+      height: 40px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <script>
+
+    //구조분해할당
+    const {body}= document;//라는 객체안에 body라는 속성이 들어있음
+    //const body = .body;
+
+    //2차원 배열 : 배열 안의 배열
+    //table
+    const $table = document.createElement('table')
+    const $result = document.createElement('div')
+    const rows = [];
+    let turn = 'O';
+
+    // {
+    //   [td, td, td]
+    //   [td, td, td]
+    //   [td, td, td]
+    // }
+
+    //승부 판단
+    //target은 td
+    const checkWinner = (target) => {
+      let rowIndex;
+      let cellIndex;
+      //ri와 ci는 index
+      //forEach반복문을 돌면서 ri(몇번째 줄) ci(몇번째 칸)이 클릭되었는지 알아냄
+      rows.forEach((row, ri)=>{
+        row.forEach((cell, ci) => {
+          if(cell === target) {
+            rowIndex = ri;
+            cellIndex = ci;
+          }
+        })
+      })
+      //세 칸 다 채워졌나?
+      //검사할 때는 false로 시작 승자가 있으면 true로 바꿔줌
+      let hasWinner = false;
+      if(//turn은 O / X
+        //가로줄 검사
+        rows[rowIndex][0].textContent === turn &&
+        rows[rowIndex][1].textContent === turn &&
+        rows[rowIndex][2].textContent === turn
+      ) {
+        hasWinner = true;
+      }
+      if(//세로줄 검사
+        rows[0][cellIndex].textContent ===turn &&
+        rows[1][cellIndex].textContent ===turn &&
+        rows[2][cellIndex].textContent ===turn 
+        ){
+          hasWinner = true;
+      }
+      if(//대각선 검사
+        rows[0][0].textContent === turn &&
+        rows[1][1].textContent === turn &&
+        rows[2][2].textContent === turn
+      ){
+        hasWinner = true;
+      }
+      if(//대각선 검사
+        rows[0][2].textContent === turn &&
+        rows[1][1].textContent === turn &&
+        rows[2][0].textContent === turn
+      ){
+        hasWinner = true;
+      }
+      return hasWinner;
+      //승자가 있으면 retrun true 승자가 없으면 retrun false 반환
+    }
+
+
+    const callback = (event) => {
+        //event.stopPropagation();event bubbling 방지
+          //칸에 O X 채우기
+          if(event.target.textContent) return;//칸에 글자가 있으면 함수 종료
+
+          event.target.textContent = turn;
+            //승부판단
+            if(checkWinner(event.target)){
+              $result.textContent = `${turn}님의 승리!`;
+              //승리했을 때 칸에 더이상 ox 채워넣을 수 없도록
+              $table.removeEventListener('click', callback)
+              return;
+            }
+            //무승부 검사
+            let draw = true;
+            rows.forEach((row)=>{
+              row.forEach((cell)=> {
+                if(!cell.textContent){
+                  draw = false;
+                }
+              });
+            });
+            if(draw){
+              $result.textContent = '무승부';
+              return;
+            } 
+
+          //turn이 O면 X로 바꾸고 아니면 O로 바꿔라
+          turn = turn === 'O'? 'X' : 'O';
+        }
+    //tr
+    for(let i = 0; i < 3; i++){
+      const $tr = document.createElement('tr')
+      const cells = [];
+      //td
+      for(let j = 0; j < 3;j++){
+        const $td = document.createElement('td')
+        cells.push($td);
+        $tr.append($td);
+      }
+      rows.push(cells);
+      $table.append($tr)
+    };
+
+    $table.addEventListener('click', callback)
+    //event bubbling
+    //td tr table body까지 clickevent가 발생
+    //만약 td가 아니라 table이 click event가 발생되기를 원해서 addEventListner를 달았는데 
+    //td까지 계속 실행되는 경우 eventTarget이 아니라 currentTarget을 해주면 됨
+
+    body.append($table);
+    body.append($result);
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+  </script>
+</body>
+</html>

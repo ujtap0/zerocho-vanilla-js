@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Date사용하기_반응속도 테스트</title>
+  <style>
+    #screen {
+      width: 300px;
+      height: 200px;
+      text-align: center;
+      user-select: none;
+    }
+    #screen.waiting {
+      background-color: aqua;
+    }
+    #screen.ready {
+      background-color: red;
+      color: white;
+    }
+    #screen.now {
+      background-color: greenyellow;
+    }
+  </style>
+</head>
+<body>
+  <div id="screen" class="waiting">클릭해서 시작하세요</div>
+  <!-- class는 해당 요소가 특정한 기능을 하고 있을 때도 붙여준다 -->
+  <div id="result"></div>
+
+  <script>
+    const $screen = document.querySelector('#screen');
+    const $result = document.querySelector('#result');
+
+    //해당 클래스가 들어 있는지 확인
+    //태그.classList.contains('클래스') -> true/ false로 반환
+    let startTime;
+    let endTime;
+    const records = [];
+    let timeoutId;
+
+    $screen.addEventListener('click', function() {
+      //let 스타트/엔드를 여기서 선언하면 함수가 실행이 되고 끝나면 변수 안의 값이 날아가서 스타트 타임이 사라짐
+
+      if($screen.classList.contains('waiting')){//파랑
+
+        //파란화면에서 클릭하면 빨간색 화면으로 바뀌고
+        $screen.classList.remove('waiting');
+        $screen.classList.add('ready');
+        //replace 써도 됨
+        $screen.textContent = '초록색이 되면 클릭하세요';
+
+        //빨간색 화면에서 랜덤시간이 흐른 뒤에 자동으로 초록색화면으로 바뀜
+        timeoutId = setTimeout(function(){
+          //시간 구하기 new Date(): 현재의 시간을 가지고 있는 객체가 만들어짐
+          //과거의 데이트 구하기는 new Date(연, 월(0월~11월 1빼주기), 일, 시, 분 ,초)
+          //시간 start
+          startTime = new Date() ;
+          $screen.classList.remove('ready');
+          $screen.classList.add('now');
+          $screen.textContent='클릭하세요';
+        }, Math.floor(Math.random()*1000)+2000);//2초에서 3초 사이
+          //2000 <= x*1000 + 2000 < 3000
+      }else if($screen.classList.contains('ready')){//빨강
+        clearTimeout(timeoutId)
+        $screen.classList.remove('ready');
+        $screen.classList.add('waiting');
+        $screen.textContent = '너무 성급하시군요!'
+        //className은 바꿔줬지만 타이머는 그대로 -> 버그픽싱 -> setTimeout의 이름 지어줘서 clearTimeout해주기
+
+      }else if($screen.classList.contains('now')){ //초록
+        //끝 시간 재기
+        endTime = new Date();
+        const current = endTime - startTime;
+        records.push(current)
+        const average = records.reduce((a, c) => a + c) / records.length;
+        $result.textContent = `현재 ${current}ms, 평균: ${average}ms`;
+        //top5 기록
+        const top_records = records.sort((a, b)=> a - b).slice(0, 5);
+        top_records.forEach((top, index) => {
+          $result.append(
+            document.createElement('br'),
+            `${index + 1}위 : ${top}ms`
+          );
+        })
+        //스타트타임, 엔드타임 초기화
+        startTime = null;
+        endTime = null;
+        $screen.classList.remove('now');
+        $screen.classList.add('waiting');
+        $screen.textContent = '클릭해서 시작하세요'
+      }
+    });
+    
+    
+    
+      //[1, 2, 3, 4].reduce((a, c) => (a + c) , 0) a는 누적값 c는 현재값 0은 초기값 = 처음 누적값
+      //a = 0, c = 1
+      //a = 1 , c = 2
+      //a = 3, c = 3
+      //a = 6 c = 4
+      //return 값은 최종 누적값 = 10
+
+      //초기값을 안넣으면 첫번째 값이 초기값
+
+      //연산자 다양하게 들어갈 수 있음
+  </script>
+</body>
+</html>

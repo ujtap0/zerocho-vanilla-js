@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>짝맞추기</title>
+  <style>
+    .card {
+      display: inline-block;
+      margin-right: 20px;
+      margin-bottom: 20px;
+      width: 70px;
+      height: 100px;
+      perspective: 140px;
+    }
+
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.8s;
+      transform-style: preserve-3d;
+    }
+
+    .card.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card-front {
+      background: navy;
+    }
+
+    .card-front,
+    .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border: 1px solid black;
+      backface-visibility: hidden;
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="wrapper"></div>
+
+  <script>
+    const $wrapper = document.querySelector('#wrapper');
+
+    const total = 12;
+    const colors = ['red', 'orange', 'yellow', 'green', 'white', 'pink']
+    let colorCopy = colors.concat(colors);
+    //concat-> 배열 합치기 그러니깐 colors가 두개 합쳐진 것이라 보면 됨
+    //6개의 쌕 2쌍식만들고 싶음 concat은 원본을 수정하지 않고 새로운 배열을 만들어 냄
+    //.concat()얕은 복사
+    let shuffled = [];
+    let clicked = [];
+    let completed = [];
+    let clickable = false;
+
+    function shuffle() {
+      for(let i = 0; colorCopy.length > 0; i += 1){
+        const randomIndex = Math.floor(Math.random() * colorCopy.length);
+        shuffled = shuffled.concat(colorCopy.slice(randomIndex, 1));
+        //과거에 써먹었던 랜덤하게 push
+        //const spiced = colorCopy.splice(randomIndex, 1);
+        //shuffled.push(spliced[0])
+      }
+    }
+
+    function createCard(i){// div.card > div.card-inner > (div.card-front + div.card-back) 
+      const card = document.createElement('div');
+      card.className = 'card';
+      const cardInner = document.createElement('div');
+      cardInner.className = 'card-inner';
+      const cardFront = document.createElement('div');
+      cardFront.className = 'card-front';
+      const cardBack = document.createElement('div');
+      cardBack.className = 'card-back';
+      cardBack.style.backgroundColor = shuffled[i];
+      cardInner.appendChild(cardFront);
+      cardInner.appendChild(cardBack);
+      card.appendChild(cardInner)
+      return card
+    }
+    //2, 5, 8, 9 카드 연속으로 클릭(색은 모두 다름)
+    //clicked 푸쉬로 순서대로
+    //clicked : [2, 5clicked.length = 2    8...settimeout500    9settimeout500] ->   ->clicked[0] = 2 clicked[2] = 5
+    //태스크큐: 8번(onclick이벤트 끝나자 마자 호출스택으로 올라와서 실행 ), 9번 (onclick이벤트 끝나자 마자 호출스택으로 올라와서 실행 )
+    //백: 12개의 addeventlistner setTimeout500(5번클릭하자마자 settimeout이 끝나면 onclick함수도 실행끝  setTimeout500실행(8번이 호출 스택으로 들어가면서 함수 실행) -> 9번도 8번 실행 순서 따름)
+
+
+    //9번카드까지 눌렀을 때
+    //clicked [2, 5, 8, 9] 2번 5번은 remove('flipped')가 적용되는데 8번 9번은 적용할 수 없음
+    //태스크큐: setTimeout500, setTimeout500, setTimeout500
+    //백: addEventListner(12)
+
+    //cliced 초기화 8번 9번 카드에 접근을 할 수 없음
+    //clicked []
+    //태스크큐: setTimeout500, setTimeout500 
+    //백: addEventListner(12)
+
+    //매개변수에 event를 넣어서 this대신 event.target을 넣어줘도 됨
+    function onClickCard () {
+      //처음에 모든 카드가 뒤집힐 때 클릭 막기/이미 완성된 카드 재클릭 막기/내가 방금 클릭한거 막기
+      if(!clickable || completed.includes(this) || clicked[0] === this){
+        return;
+      }
+      this.classList.toggle('flipped');
+      //this는 card
+      clicked.push(this);
+        if(clicked.lenezgth !== 2){
+          return;
+        }
+        //card의 cardBack의 background color
+        //this는 card 
+        const firstBackColor = clicked[0].querySelector('.card-back').style.backgroundColor
+        const secondBackColor = clicked[1].querySelector('.card-back').style.backgroundColor
+        if (firstBackColor === secondBackColor){
+          clickable = false;//2개 이상이 연달아 클릭되는 것 방지
+          completed.push(clicked[0]);
+          completed.push(clicked[1]);
+          clicked = [];
+          clickable = true;
+          //total은 12
+          if(completed.length !== total){
+            return;            
+          }
+          //마직막 카드가 안뒤집힌 채 축하 메세지가 뜨므로 그걸 방지해 주기 위해 1초뒤에 메세지 창 띄우기
+          setTimeout(() => {
+            alert('축하합니다!');
+            resetGame();
+          }, 1000);
+          return;
+        }
+        //앞면이 보일 수 있는 충분한 시간 확보
+        setTimeout(() => {
+          clicked[0].classList.remove('flipped')
+          clicked[1].classList.remove('flipped')
+          //clicked 초기화
+          clicked = [];
+        }, 500)
+    }
+
+    function startGame() {
+      clickable = false;
+      shuffle();//1. 카드 섞기
+      for (let i = 0; i < total; i += 1){
+        //섞인 대로 카드 만들어냄
+        const card = createCard(i);
+        card.addEventListener('click', onClickCard);
+        $wrapper.appendChild(card);
+      }
+
+      document.querySelectorAll('.card').forEach((card, index) => {
+        setTimeout(() => {
+          card.classList.add('flipped');
+        }, 1000 + 100 * index);
+      });
+
+      setTimeout(() => {
+        document.querySelectorAll('.card').forEach((card) => {
+          card.classList.remove('flipped');
+        });
+        clickable = true;
+      }, 5000);
+    }
+    startGame();
+
+
+    function resetGame() {
+      $wrapper.innerHTML = '';
+      //초기화 해줄 때 원본이 바뀌면 안됨
+      //원본 바뀌는 것들: push. pop, unshift, shift, splice. sort...
+      colorCopy = colors.concat(colors);
+      shuffled = [];
+      completed =[];
+      startGame();
+    }
+  </script>
+</body>
+
+</html>

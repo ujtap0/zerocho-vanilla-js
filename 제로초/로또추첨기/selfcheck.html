@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+
+<head>
+  <meta charset="utf-8">
+  <title>로또추첨기</title>
+  <style>
+    button {
+      width: 30px;
+      height: 30px;
+      margin: 2px
+    }
+
+    #input {
+      width: 180px;
+      height: 100px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .ball {
+      display: inline-block;
+      border: 1px solid black;
+      border-radius: 20px;
+      width: 40px;
+      height: 40px;
+      line-height: 40px;
+      font-size: 20px;
+      text-align: center;
+      margin-right: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <form id="form">
+    <input readonly type="text" id="input">
+    <button id="submit">제출</button>
+  </form>
+
+  <div class="row">
+    <button id="num-1">1</button>
+    <button id="num-2">2</button>
+    <button id="num-3">3</button>
+    <button id="num-4">4</button>
+    <button id="num-5">5</button>
+  </div>
+  <div class="row">
+    <button id="num-6">6</button>
+    <button id="num-7">7</button>
+    <button id="num-8">8</button>
+    <button id="num-9">9</button>
+    <button id="num-10">10</button>
+  </div>
+  <div class="row">
+    <button id="num-11">11</button>
+    <button id="num-12">12</button>
+    <button id="num-13">13</button>
+    <button id="num-14">14</button>
+    <button id="num-15">15</button>
+  </div>
+  <div class="row">
+    <button id="num-16">16</button>
+    <button id="num-17">17</button>
+    <button id="num-18">18</button>
+    <button id="num-19">19</button>
+    <button id="num-20">20</button>
+  </div>
+  <div class="row">
+    <button id="num-21">21</button>
+    <button id="num-22">22</button>
+    <button id="num-23">23</button>
+    <button id="num-24">24</button>
+    <button id="num-25">25</button>
+
+  </div>
+  <div class="row">
+    <button id="num-26">26</button>
+    <button id="num-27">27</button>
+    <button id="num-28">28</button>
+    <button id="num-29">29</button>
+    <button id="num-30">30</button>
+  </div>
+  <div class="row">
+    <button id="num-31">31</button>
+    <button id="num-32">32</button>
+    <button id="num-33">33</button>
+    <button id="num-34">34</button>
+    <button id="num-35">35</button>
+  </div>
+  <div class="row">
+    <button id="num-36">36</button>
+    <button id="num-37">37</button>
+    <button id="num-38">38</button>
+    <button id="num-39">39</button>
+    <button id="num-40">40</button>
+  </div>
+  <div class="row">
+    <button id="num-41">41</button>
+    <button id="num-42">42</button>
+    <button id="num-43">43</button>
+    <button id="num-44">44</button>
+    <button id="num-45">45</button>
+  </div>
+
+
+  <div id="result">추첨 결과는? </div>
+  <div id="bonus">보너스: </div>
+  <div id="win">당첨 결과: </div>
+
+  <script>
+    document.querySelector('#num-1').addEventListener('click', onClickNumber)
+    document.querySelector('#num-2').addEventListener('click', onClickNumber)
+    document.querySelector('#num-3').addEventListener('click', onClickNumber)
+    document.querySelector('#num-4').addEventListener('click', onClickNumber)
+    document.querySelector('#num-5').addEventListener('click', onClickNumber)
+    document.querySelector('#num-6').addEventListener('click', onClickNumber)
+    document.querySelector('#num-7').addEventListener('click', onClickNumber)
+    document.querySelector('#num-8').addEventListener('click', onClickNumber)
+    document.querySelector('#num-9').addEventListener('click', onClickNumber)
+    document.querySelector('#num-10').addEventListener('click', onClickNumber)
+    document.querySelector('#num-11').addEventListener('click', onClickNumber)
+    document.querySelector('#num-12').addEventListener('click', onClickNumber)
+    document.querySelector('#num-13').addEventListener('click', onClickNumber)
+    document.querySelector('#num-14').addEventListener('click', onClickNumber)
+    document.querySelector('#num-15').addEventListener('click', onClickNumber)
+    document.querySelector('#num-16').addEventListener('click', onClickNumber)
+    document.querySelector('#num-17').addEventListener('click', onClickNumber)
+    document.querySelector('#num-18').addEventListener('click', onClickNumber)
+    document.querySelector('#num-19').addEventListener('click', onClickNumber)
+    document.querySelector('#num-20').addEventListener('click', onClickNumber)
+    document.querySelector('#num-21').addEventListener('click', onClickNumber)
+    document.querySelector('#num-22').addEventListener('click', onClickNumber)
+    document.querySelector('#num-23').addEventListener('click', onClickNumber)
+    document.querySelector('#num-24').addEventListener('click', onClickNumber)
+    document.querySelector('#num-25').addEventListener('click', onClickNumber)
+    document.querySelector('#num-26').addEventListener('click', onClickNumber)
+    document.querySelector('#num-27').addEventListener('click', onClickNumber)
+    document.querySelector('#num-28').addEventListener('click', onClickNumber)
+    document.querySelector('#num-29').addEventListener('click', onClickNumber)
+    document.querySelector('#num-30').addEventListener('click', onClickNumber)
+    document.querySelector('#num-31').addEventListener('click', onClickNumber)
+    document.querySelector('#num-32').addEventListener('click', onClickNumber)
+    document.querySelector('#num-33').addEventListener('click', onClickNumber)
+    document.querySelector('#num-34').addEventListener('click', onClickNumber)
+    document.querySelector('#num-35').addEventListener('click', onClickNumber)
+    document.querySelector('#num-36').addEventListener('click', onClickNumber)
+    document.querySelector('#num-37').addEventListener('click', onClickNumber)
+    document.querySelector('#num-38').addEventListener('click', onClickNumber)
+    document.querySelector('#num-39').addEventListener('click', onClickNumber)
+    document.querySelector('#num-40').addEventListener('click', onClickNumber)
+    document.querySelector('#num-41').addEventListener('click', onClickNumber)
+    document.querySelector('#num-42').addEventListener('click', onClickNumber)
+    document.querySelector('#num-43').addEventListener('click', onClickNumber)
+    document.querySelector('#num-44').addEventListener('click', onClickNumber)
+    document.querySelector('#num-45').addEventListener('click', onClickNumber)
+
+    const $input = document.querySelector('#input');
+
+    const selectedNumber = [];
+
+    const onClickNumber = (event) => {
+      const number = event.target.textContent;
+      selectedNumber.push(number)
+      //sort는 순차적 배열
+      const arrayNumber = selectedNumber.sort((a, b) => {
+        return a - b
+      })
+      $input.value = arrayNumber.join();
+    };
+
+    const candidate = Array(45).fill().map((v, i) => i + 1);
+    const shuffle = [];
+    //45개의 숫자를 랜덤으로 섞기
+    while (candidate.length > 0) {
+      const random = Math.floor(Math.random() * candidate.length); // 무작위 인덱스 뽑기
+      const spliceArray = candidate.splice(random, 1); // 뽑은 값은 배열에 들어 있음
+      const value = spliceArray[0]; // 배열에 들어 있는 값을 꺼내어
+      shuffle.push(value); // shuffle 배열에 넣기
+    }
+    console.log(shuffle);
+    const winBalls = shuffle.slice(0, 6).sort((a, b) => a - b);
+    const bonus = shuffle[6];
+    console.log(winBalls, bonus);
+
+    const $form = document.querySelector('#form')
+
+    function checkInput(input) {
+      if (input.length < 6) {
+        return alert('숫자 6개를 뽑아주세요')
+      }
+      if (new Set(input).size !== 6) {
+        return alert('중복되지 않게 입력해 주세요')
+      }
+      if (input.lenth > 6) {
+        return alert('모든 값을 입력하셨습니다')
+      }
+      return true;
+    }
+
+
+
+    $form.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const value = selectedNumber;
+      const valid = checkInput(value);
+
+      if (!valid) return;
+
+      const $result = document.querySelector('#result');
+
+      function colorize(number, $tag) {
+        if (number < 10) {
+          $tag.style.backgroundColor = 'red';
+          $tag.style.color = 'white';
+        } else if (number < 20) {
+          $tag.style.backgroundColor = 'orange';
+        } else if (number < 30) {
+          $tag.style.backgroundColor = 'yellow';
+        } else if (number < 40) {
+          $tag.style.backgroundColor = 'blue';
+          $tag.style.color = 'white';
+        } else {
+          $tag.style.backgroundColor = 'green';
+          $tag.style.color = 'white';
+        }
+      }
+
+      const drawBall = (number, $parent) => {
+        const $ball = document.createElement('div');
+        $ball.className = 'ball';
+        colorize(number, $ball);
+        $ball.textContent = number;
+        $parent.appendChild($ball);
+      };
+      // [0, 1, 2, 3, 4, 5] -> [1000, 2000, 3000, 4000, 5000, 6000]
+      for (let i = 0; i < winBalls.length; i++) {
+        setTimeout(() => {
+          console.log(winBalls[i], i);
+          drawBall(winBalls[i], $result);
+        }, (i + 1) * 1000);
+      }
+
+      const $bonus = document.querySelector('#bonus');
+      setTimeout(() => {
+        drawBall(bonus, $bonus);
+        //당첨 결과
+
+        const $win = document.querySelector('#win')
+
+
+
+        if (winBalls.join('') === selectedNumber.join('')) {
+          $win.append('1등')
+          return;
+        }
+        const correctNumber = [];
+
+        for (let i = 0; i < 6; i++) {
+          const index = winBalls.indexOf(parseInt(value[i]))
+          if (index > -1) {
+            correctNumber.push(index)
+          }
+        }
+
+        console.log(correctNumber)
+        if (value.includes(bonus[0]) && correctNumber.length === 5) {
+          $win.append('2등')
+        } else if (correctNumber.length === 5) {
+          $win.append('3등')
+        } else if (correctNumber.length === 4) {
+          $win.append('4등')
+        } else if (correctNumber.length === 3) {
+          $win.append('5등')
+        } else {
+          $win.append('꽝')
+        }
+        1
+      }, 7000);
+
+
+
+
+    })
+  </script>
+</body>

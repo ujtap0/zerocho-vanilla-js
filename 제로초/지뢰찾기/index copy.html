@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>지뢰찾기</title>
+  <style>
+    table {
+      border-collapse: collapse;
+    }
+
+    td {
+      border: 1px solid #bbb;
+      text-align: center;
+      line-height: 20px;
+      width: 20px;
+      height: 20px;
+      background: #888;
+    }
+
+    td.opened {
+      background: white;
+    }
+
+    td.flag {
+      background: red;
+    }
+
+    td.question {
+      background: orange;
+    }
+  </style>
+</head>
+
+<body>
+  <form id="form">
+    <input placeholder="가로 줄" id="row" size="5" />
+    <input placeholder="세로 줄" id="cell" size="5" />
+    <input placeholder="지뢰" id="mine" size="5" />
+    <button>생성</button>
+  </form>
+  <div id="timer">0초</div>
+  <table id="table">
+    <tbody></tbody>
+  </table>
+  <div id="result"></div>
+
+
+  <script>
+    const $form = document.querySelector('#form')
+    const $timer = document.querySelector('#timer')
+    const $tbody = document.querySelector('#table tbody');
+    const $result = document.querySelector('#result');
+    let row;  //줄
+    let cell; //칸
+    let mine; //지뢰
+    const CODE = {
+      NORMAL : -1,//닫힌 칸(지뢰없음)
+      QUESTION : -2,
+      FLAG : -3,
+      QUESTION_MINE: -4,
+      FLAG_MINE: -5,
+      MINE: -6,
+      OPENED: 0,
+    }
+    let data;
+    let openCount = 0;
+    let startTime;
+    let ineterval;
+    const dev = true;
+
+    
+    function onSubmit (event) {
+      event.preventDefault();
+      
+      //event target은 form
+      row = parseInt(event.target.row.value);
+      cell = parseInt(event.target.cell.value);
+      mine = parseInt(event.target.mine.value);
+      openCount = 0;
+      // clearInterval(interval);
+      //지뢰눌러서 다시 생성하려고 할때 기존 $tbody밑에 새로 생김방지
+      $tbody.innerHTML = '';
+      drawTable();
+      startTime = new Date();
+      interval = setInterval(()=>{
+        const time = Math.floor((new Date() - startTime) / 1000);
+        $timer.textContent = `${time}초`
+      }, 1000)
+    }
+    $form.addEventListener('submit', onSubmit);
+
+    function plantMine(){
+      //0부터 99까지 있는 배열 만들기
+      const candidate = Array(row * cell).fill().map((arr, i) =>{
+        return i;
+      });
+      const shuffle = [];
+      //지뢰 심을 배열의 index 랜덤하게 뽑기
+      while (candidate.length > row * cell - mine) {
+        const chosen = candidate.splice(Math.floor(Math.random()*candidate.length), 1)[0];
+        shuffle.push(chosen);
+      }
+        const data = [];
+        //표를 다룰 때 많이 쓰이는 이중반복문/2차원 배열
+        for (let i = 0; i < row; i++){
+          //상위 반복문: 10줄의 배열을 data에 넣어줌
+          const rowData = [];
+          data.push(rowData);
+          for(let j = 0; j < cell; j++){
+            //하위반목문
+            //row의 data에 일단 모두 닫힌 칸을 뜻하는 코드 NORMAL을 넣어줌
+            rowData.push(CODE.NORMAL);
+          }
+        }
+        //shuffle =[85, 19, 93]
+        for (let k = 0; k < shuffle.length; k++){
+          //몇번 째 줄인지 알아보기 위해 cell로 나눔
+          const ver = Math.floor(shuffle[k] / cell);
+          //몇번 째 칸인지 알아보기 위해 나머지를 구함
+          const hor = shuffle[k] % cell;
+          data[ver][hor] = CODE.MINE;
+        }
+        //결과
+        //[-1, -1, -6, -1, -1, -1, -1, -1, -1, -1]
+        //[-1, -1, -1, -1, -1, -6, -1, -1, -1, -1]
+        //[-6, -1, -1, -1, -1, -1, -1, -1, -1, -1]
+        //[-1, -1, -1, -1, -1, -1, -1, -1, -6, -1]
+        //[-1, -1, -1, -1, -6, -1, -1, -6, -1, -1]
+        //[-1, -6, -1, -1, -1, -1, -1, -1, -1, -1]
+        //[-1, -1, -1, -1, -1, -6, -1, -1, -1, -1]
+        //[-1, -1, -1, -1, -1, -1, -1, -1, -1, -6]
+        //[-1, -1, -1, -1, -1, -1, -1, -1, -6, -1]
+        //[-1, -1, -1, -6, -1, -1, -1, -1, -1, -1]
+        //[-1, -6, -1, -1, -1, -1, -6, -1, -1, -1]
+
+        return data;
+      }
+    
+
+    function onRightClick(event){
+      event.preventDefault();
+      const target = event.target;
+      const rowIndex = target.parentNode.rowIndex;
+      const cellIndex = target.cellIndex;
+      const cellData = data[rowIndex][cellIndex];
+      if(cellData === CODE.MINE) {//지뢰인 경우
+        data[rowIndex][cellIndex] = CODE.QUESTION_MINE;//물음표 지뢰로
+        target.className = 'question'
+        target.textContent = '?'
+      }else if (cellData === CODE.QUESTION_MINE){//물음표 지뢰인 경우
+        data[rowIndex][cellIndex] = CODE.FLAG_MINE;//깃발 지뢰로
+        target.className = 'flag';
+        target.textContent = '!'
+      }else if (cellData === CODE.FLAG_MINE){//깃발 지뢰인 경우
+        data[rowIndex][cellIndex] = CODE.MINE;//지뢰로
+        target.className='';
+        target.textContent='X';
+      }else if(cellData === CODE.NORMAL){//닫힌 칸이면
+        data[rowIndex][cellIndex] = CODE.QUESTION; //물음표로
+        target.className="question"
+        target.textContent='?'
+      }else if(cellData === CODE.QUESTION){//물음표이면
+        data[rowIndex][cellIndex] = CODE.FLAG; //깃발로
+        target.className="flag"
+        target.textContent='!'
+      }else if(cellData === CODE.FLAG){//깃발이면
+        data[rowIndex][cellIndex] = CODE.NORMAL; //닫힌 칸으로
+        target.className=""
+        target.textContent=''
+      }
+    }
+    function countMine(rowIndex, cellIndex){
+      //rowIndex와 cellIndex는 onLeftClick 함수에서 받아옴
+      const mines = [CODE.MINE, CODE.QUESTION_MINE, CODE.FLAG_MINE];
+                  //-6,-4,-5
+      let i = 0;
+      //주변 8칸
+      //1번칸
+      mines.includes(data[rowIndex - 1]?.[cellIndex - 1]) && i++;
+      //&&연산자: 앞에 것이 존재하면 뒤에 것을 실행해라
+      //?.연산자: 앞에 값이 있으면 뒤에 것을 실행해라 보호연산자(옵셔널 체이닝)
+      //2번칸
+      mines.includes(data[rowIndex - 1]?.[cellIndex]) && i++;
+      //3번칸
+      mines.includes(data[rowIndex - 1]?.[cellIndex + 1]) && i++;
+      //4번칸
+      mines.includes(data[rowIndex][cellIndex - 1]) && i++;
+      //5번칸은 클릭한 자신
+      //6번칸
+      mines.includes(data[rowIndex][cellIndex + 1]) && i++;
+      //7번칸
+      mines.includes(data[rowIndex + 1]?.[cellIndex - 1]) && i++;
+      //8번칸
+      mines.includes(data[rowIndex + 1]?.[cellIndex]) && i++;
+      //9번칸
+      mines.includes(data[rowIndex + 1]?.[cellIndex + 1]) && i++;
+      return i;
+    };
+    function open(rowIndex, cellIndex){
+      //한번 열린칸이면 함수 종료
+      if (data[rowIndex]?.[cellIndex] >= CODE.OPENED) return;
+      const target = $tbody.children[rowIndex]?.children[cellIndex];
+      if(!target){
+        return;
+      }
+      const count = countMine(rowIndex, cellIndex);
+      target.textContent = count || '';
+      target.className = 'opened';
+      data[rowIndex][cellIndex] = count;
+      openCount++;
+      console.log(openCount)
+
+      //승리 -> 지뢰 제외 칸들이 모두 열린 경우
+      if(openCount === row * cell - mine) {
+        const time = (new Date() - startTime) / 1000;
+        clearInterval(interval);
+        $tbody.removeEventListener('contextmenu', onRightClick)
+        $tbody.removeEventListener('click', onLeftClick)
+        //게임이 실제로 실행되기 전에 alert가 실행되는 것을 방지하기 위해서 settimeout
+        setTimeout(()=>{
+          alert(`승리했습니다! ${time}초가 걸렸습니다`)
+        },500)
+      }
+
+      return count;
+    }
+
+    function openAround(rI, cI){
+      setTimeout(() => {
+        const count = open(rI, cI);
+        if(count === 0){
+          //재귀함수
+          openAround(rI - 1, cI - 1);
+          openAround(rI - 1, cI);
+          openAround(rI - 1, cI + 1);
+          openAround(rI, cI - 1);
+          openAround(rI, cI + 1);
+          openAround(rI + 1, cI - 1);
+          openAround(rI + 1, cI);
+          openAround(rI + 1, cI + 1);
+        }
+      }, 0);
+    }
+
+    let normalCellFound = false;
+    let searched
+    let firstClick = true;// 첫번째 클릭인지 아닌지 -> 다른방법은 openCount가 0이면 첫번째 클릭
+    
+    function transferMine(rI, cI){
+      if(normalCellFound) return;  //이미 빈칸을 찾앗으면 종료
+      if(rI < 0 || rI >= row || cI < 0 || cI >= cell) return; //배열 밖의 데이터 읽기 시도 방지
+      if(searched[rI][cI]) return; //이미 찾은 칸이면 종료
+      if(data[rI]?.[cI] === CODE.NORMAL){ //빈칸인 경우
+        normalCellFound = true;
+        data[rI][cI] = CODE.MINE;
+      }else{ // 지뢰 칸인 경우 8방향 탐색
+        searched[rI][cI] = true;
+        transferMine(rI - 1, cI - 1);
+        transferMine(rI - 1, cI);
+        transferMine(rI - 1, cI + 1);
+        transferMine(rI, cI - 1);
+        transferMine(rI, cI + 1);
+        transferMine(rI + 1, cI - 1);
+        transferMine(rI + 1, cI);
+        transferMine(rI + 1, cI + 1);
+      }
+    }
+    function showMines(){
+      const mines = [CODE.MINE, CODE.QUESTION_MINE, CODE.FLAG_MINE];
+      data.forEach((row, rowIndex) => {
+        row.forEach((cell, cellIndex) => {
+          if(mines.includes(cell)){
+            $tbody.children[rowIndex].children[cellIndex].textContent = 'X';
+          }
+        })
+      })
+    }
+
+    //1, 2, 3
+    //4, 5, 6
+    //7, 8, 9
+    //serched라는 이차원배열을 똑같이 만들고 이미 찾아본 칸이면 함수 실행 종료
+    //재귀함수에서 서로 호출해서 무한 반복되는 것 막기
+    //openAround와 다른점: openAround는 기준을  normal / opened와 같이 기준을 정확히 세울 수 있었음
+    //trnasferMine은 이 칸이 내가 이미 찾았던 칸인가 확인하려면 새로운 이차원배열 필요
+    function onLeftClick (event){
+      const target = event.target; //td태그
+      const rowIndex = target.parentNode.rowIndex;
+      const cellIndex = target.cellIndex;
+      let cellData = data[rowIndex][cellIndex];
+
+      if(firstClick) {
+        firstClick = false;
+        searched = Array(row).fill().map(() => []);
+        if(cellData === CODE.MINE){ //첫 클릭이 지뢰면
+          transferMine(rowIndex, cellIndex); //지뢰 옮기기
+          data[rowIndex][cellIndex] = CODE.NORMAL; //지금 칸을 빈칸으로
+          cellData = CODE.NORMAL;
+        }
+      }
+
+      if(cellData === CODE.NORMAL){//닫힌 칸이면
+        openAround(rowIndex, cellIndex) //클릭한 칸이 0이면 주변에 있는 0칸도 다 열리게 하는 것
+
+        // const count = countMine(rowIndex, cellIndex);
+        // //count가 없으면 뒤에꺼 실행 있으면 count 실행
+        // //count가 없는 경우는 0일 때
+        // //만약 count가 0인데 false가 아니라 0 그대로 표현하고 싶을 때는 ?? 연산자 사용 -> null/undefined이면 뒤에꺼 실행
+        // target.textContent = count || '';
+        // target.className = 'opened';
+        // data[rowIndex][cellIndex] = count;
+      }else if(cellData === CODE.MINE){
+        showMines();
+        target.textContent = '펑';
+        target.className = 'opened'
+        clearInterval(interval);
+        $tbody.removeEventListener('contextmenu', onRightClick);
+        $tbody.removeEventListener('click', onLeftClick);
+      }
+    }
+
+
+
+
+
+    function drawTable (){
+      data = plantMine();
+      data.forEach((row)=>{
+        const $tr = document.createElement('tr')
+        row.forEach((cell)=>{
+          const $td = document.createElement('td');
+          if(cell === CODE.MINE) {
+           dev && ($td.textContent = 'X');
+          }
+          $tr.append($td);
+        })
+        $tbody.append($tr);
+        //이벤트버블링
+        //이벤트 제거할 때 한번만 해주면 되니깐 효율적
+        $tbody.addEventListener('contextmenu', onRightClick);
+        $tbody.addEventListener('click', onLeftClick);
+      })
+    }
+
+    //maximum call stack size exceeded 에러
+    //재귀함수할 때 빈번하게 발생
+    // 호출스택: 
+    // 1. onLeftClick / openAround /open / countMine
+    // 2. onLeftClick / openAround / (open 종료)
+    // 3. onLeftClick / openAround / openAround / openAround / openAround 반복 ->호출스택 초과
+    //해결방법: 비동기 함수사용 -> 태스크큐로 넘겨줌
+
+    //setTimeout사용해서 태스크큐가 오버되는 것은 해결해줬지만 실행 속도가 매우 느림
+    //이유: 클리해서 openAround가 실행되면 옆에 칸도 openAround가 실행되는데 이렇게 되면 무한반복됨
+  </script>
+</body>
+
+</html>
+

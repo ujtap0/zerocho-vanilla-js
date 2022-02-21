@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>가위바위보</title>
+
+  <style>
+    #computer {
+      width: 142px;
+      height: 200px;
+    }
+  </style>
+
+</head>
+<body>
+  <div id="computer"></div>
+<div>
+  <button id="scissors" class="btn">가위</button>
+  <button id="rock" class="btn">바위</button>
+  <button id="paper" class="btn">보</button>
+</div>
+<div id="score">0</div>
+
+<script>
+  const $computer = document.querySelector('#computer');
+  const $score = document.querySelector('#score');
+  const $rock = document.querySelector('#rock');
+  const $scissors = document.querySelector('#scissors');
+  const $paper = document.querySelector('#paper');
+  const IMG_URL = './rsp.png';
+  $computer.style.background = `url(${IMG_URL}) -464px 0`;//background 가로 세로 위치
+  $computer.style.backgroundSize = 'auto 200px';
+
+  //객체 -> 공통된 부분 있으면 그룹화
+  //가위바위보 X좌표
+  const rspX = {
+    scissors: '0',//가위
+    rock: '-220px',//바위
+    paper: '-440px'//보
+  };
+
+  //일정 시간마다 반복
+  //0.05s마다 가위바위보 그림 바꾸기 = x좌표 바꾸기
+  
+  //setInterval vs setTimeOut비교
+
+  //rspX.computerChoice -> 문자열
+  //rspx[computerChoice] -> 값
+ 
+  let computerChoice = 'scissors';//처음 시작 -> 가위일 때
+
+  const changeComputerHand = () => {
+    if(computerChoice === 'scissors'){ //가위면
+      computerChoice = 'rock';
+    }else if(computerChoice === 'rock'){//바위
+      computerChoice = 'paper';
+    }else if(computerChoice === 'paper'){ //보
+      computerChoice = 'scissors';
+    }
+    $computer.style.background = `url(${IMG_URL}) ${rspX[computerChoice]} 0`;//background 가로 세로 위치
+    $computer.style.backgroundSize = 'auto 200px';
+  };
+
+  //타이머 멈췄다 다시 실행 clearInterval(아이디) 아이디는 let 아이디 = setInterval(함수, 밀리초)
+
+  let intervalId = setInterval(changeComputerHand, 50)
+
+  let clickable = true;
+  let score = 0;
+  let computer = 0;
+  let me = 0;
+  let tries = 0;
+
+  //변수 위치 중요
+
+  const clickButton = () => {
+    if(clickable){
+      clearInterval(intervalId);
+      clickable = false;
+
+      const scoreTable = {
+        rock: 0,
+        scissors: 1,
+        paper: -1
+      }
+
+      //내가 클릭한 값 찾기 조건부연산자 사용
+      const myChoice = event.target.id === 'rock'
+      ? 'rock'
+      :event.target.id === 'scissors'
+      ? 'scissors'
+      : 'paper'
+
+      const myScore = scoreTable[myChoice]
+      const computerScore = scoreTable[computerChoice];
+      const diff = myScore - computerScore
+
+      
+      let message;
+
+      
+
+      if(diff === 2 || diff === -1){
+        score +=1
+        me +=1
+        tries += 1
+        message = '승리'
+      } else if(diff === -2 || diff === 1){
+        score -=1
+        computer +=1
+        tries += 1
+        message = '패배'
+      } else {
+        tries += 1
+        message = '무승부'
+      }
+
+      console.log(tries)
+      
+      $score.textContent = `${message} 총: ${score}점`
+      
+      if (tries === 5){
+        if(me >= 3){//===보다 >=써주기 4점, 5점도 얻을 수 있으니깐
+          alert('승리입니다')
+        }
+        else if(computer >= 3){
+          alert('패배입니다')
+        }
+        else{
+          alert('무승부입니다')
+        }
+      }
+      
+      //마지막에는 다시 가위 바위 보가 돌아가야하니깐 1초뒤에 다시 실행되게 setInterval 실행
+      setTimeout(() => {
+        clickable = true;
+        intervalId = setInterval(changeComputerHand, 50)
+      }, 1000)
+    }
+  }
+
+  //버그 픽싱
+  //버튼을 여러번 클릭->setInterval 여러번 실행
+  //예> clickButton 5번 호출, interval 1번, 2번, 3번, 4번, 5번(마지막 순서인 5번만 intervalId에 저장)
+  //그 다음 button을 한번 더 클릭하면 5번만 취소됨(clearInterval)
+  //1번, 2번, 3번, 4번은 계속 실행되고 있음 clearInterval로 취소도 안됨
+
+
+  $rock.addEventListener('click', clickButton);
+  $scissors.addEventListener('click', clickButton);
+  $paper.addEventListener('click', clickButton);
+
+  //가위바위보 규칙찾기
+</script>
+</body>
+</html>
